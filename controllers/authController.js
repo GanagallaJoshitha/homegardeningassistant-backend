@@ -1,82 +1,70 @@
 import supabase from "../config/supabase.js";
+import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
-// ================= REGISTER =================
 export const registerUser = async (req, res) => {
-  const { name, email, password } = req.body;
-
-  if (!name || !email || !password) {
-    return res.status(400).json({ message: "All fields are required" });
-  }
-
   try {
-    // Check if user already exists
-    const { data: existingUser } = await supabase
-      .from("users")
-      .select("*")
-      .eq("email", email)
-      .single();
+    const { name, email, password, location } = req.body;
 
-    if (existingUser) {
-      return res.status(400).json({ message: "User already exists" });
+    if (!email || !password || !name) {
+      return res.status(400).json({ message: "All fields required" });
     }
 
-    // Insert new user
+    const hashedPassword = await bcrypt.hash(password, 10);
+
     const { data, error } = await supabase
       .from("users")
-      .insert([{ name, email, password }])
-      .select();
+      .insert([
+        { name, email, password: hashedPassword, location }
+      ])
+      .select()
+      .single();
 
     if (error) {
       return res.status(400).json({ error: error.message });
     }
 
-    res.status(201).json({
-      message: "User registered successfully",
-      user: data[0]
-    });
-
+    res.status(201).json({ message: "User registered", data });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 };
 
-
-// ================= LOGIN =================
 export const loginUser = async (req, res) => {
-  const { email, password } = req.body;
-
-  if (!email || !password) {
-    return res.status(400).json({ message: "Email and password required" });
-  }
-
   try {
-    const { data: user, error } = await supabase
+    const { email, password } = req.body;
+
+    const { data: user } = await supabase
       .from("users")
       .select("*")
       .eq("email", email)
       .single();
 
-    if (error || !user) {
-      return res.status(400).json({ message: "User not found" });
+    if (!user) {
+      return res.status(401).json({ message: "Invalid credentials" });
     }
 
-    if (user.password !== password) {
-      return res.status(400).json({ message: "Invalid password" });
+    const isMatch = await bcrypt.compare(password, user.password);
+
+    if (!isMatch) {
+      return res.status(401).json({ message: "Invalid credentials" });
     }
 
     const token = jwt.sign(
       { id: user.id, email: user.email },
       process.env.JWT_SECRET,
-      { expiresIn: "1d" }
+      { expiresIn: "7d" }
     );
 
-    res.status(200).json({
-      message: "Login successful",
+    res.json({
+      message: "Login success",
       token,
-      user
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+      },
     });
-
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
