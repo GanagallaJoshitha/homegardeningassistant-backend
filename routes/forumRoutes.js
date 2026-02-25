@@ -1,17 +1,8 @@
 import express from "express";
-import {
-  createForumPost,
-  getForumPosts,
-  createComment,
-  getPostComments
-} from "../controllers/forumController.js";
+import { getPosts, getComments } from "../controllers/forumController.js";
 
 const router = express.Router();
-
-router.post("/", createForumPost);
-router.get("/", getForumPosts);
-
-router.post("/comment", createComment);
-router.get("/comments", getPostComments);
+router.get("/", getPosts);
+router.get("/comments", getComments);
 
 export default router;

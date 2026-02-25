@@ -1,19 +1,32 @@
-import * as gardenModel from "../models/gardenModel.js";
 import { supabase } from "../config/supabaseClient.js";
-export const addPlant = async (req, res, next) => {
+
+// GET user garden
+export const getUserGarden = async (req, res, next) => {
   try {
-    const result = await gardenModel.addPlantToGarden(req.body);
-    res.status(201).json(result);
+    const { user_id } = req.query; // ?user_id=uuid
+    const { data, error } = await supabase
+      .from("user_garden")
+      .select("*, plants(*)")
+      .eq("user_id", user_id);
+
+    if (error) throw error;
+
+    res.json(data);
   } catch (err) {
     next(err);
   }
 };
 
-export const getGarden = async (req, res, next) => {
+// ADD plant to user garden
+export const addToGarden = async (req, res, next) => {
   try {
-    const { user_id } = req.query;
-    const result = await gardenModel.getUserGarden(user_id);
-    res.json(result);
+    const { user_id, plant_id, planting_date } = req.body;
+    const { data, error } = await supabase.from("user_garden").insert([
+      { user_id, plant_id, planting_date }
+    ]);
+
+    if (error) throw error;
+    res.json(data);
   } catch (err) {
     next(err);
   }

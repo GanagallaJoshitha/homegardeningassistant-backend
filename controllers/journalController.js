@@ -1,20 +1,18 @@
-import * as journalModel from "../models/journalModel.js";
 import { supabase } from "../config/supabaseClient.js";
-export const createJournal = async (req, res, next) => {
-  try {
-    const result = await journalModel.addJournalEntry(req.body);
-    res.status(201).json(result);
-  } catch (err) {
-    next(err);
-  }
-};
 
-export const getJournal = async (req, res, next) => {
+export const getUserJournal = async (req, res) => {
+  const { user_id } = req.query;
+  if (!user_id) return res.status(400).json({ error: "user_id required" });
+
   try {
-    const { user_garden_id } = req.query;
-    const result = await journalModel.getJournalByGarden(user_garden_id);
-    res.json(result);
+    const { data, error } = await supabase
+      .from("plant_journal")
+      .select("*")
+      .eq("user_id", user_id);
+
+    if (error) return res.status(500).json({ error: error.message });
+    res.json(data);
   } catch (err) {
-    next(err);
+    res.status(500).json({ error: err.message });
   }
 };

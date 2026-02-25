@@ -1,14 +1,8 @@
 import express from "express";
-import {
-  getChallenges,
-  joinChallenge,
-  getLeaderboard
-} from "../controllers/challengeController.js";
+import { getChallenges, getUserChallenges } from "../controllers/challengeController.js";
 
 const router = express.Router();
-
 router.get("/", getChallenges);
-router.post("/join", joinChallenge);
-router.get("/leaderboard", getLeaderboard);
+router.get("/user", getUserChallenges);
 
 export default router;

@@ -1,8 +1,9 @@
 import express from "express";
-import { getPlants } from "../controllers/plantController.js";
+import { getAllPlants, getPlantById } from "../controllers/plantController.js";
 
 const router = express.Router();
 
-router.get("/", getPlants);
+router.get("/", getAllPlants);
+router.get("/:id", getPlantById);
 
 export default router;

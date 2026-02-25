@@ -1,20 +1,18 @@
-import * as shoppingModel from "../models/shoppingModel.js";
 import { supabase } from "../config/supabaseClient.js";
-export const createItem = async (req, res, next) => {
-  try {
-    const result = await shoppingModel.addItem(req.body);
-    res.status(201).json(result);
-  } catch (err) {
-    next(err);
-  }
-};
 
-export const getShoppingItems = async (req, res, next) => {
+export const getUserShopping = async (req, res) => {
+  const { user_id } = req.query;
+  if (!user_id) return res.status(400).json({ error: "user_id required" });
+
   try {
-    const { user_id } = req.query;
-    const result = await shoppingModel.getItems(user_id);
-    res.json(result);
+    const { data, error } = await supabase
+      .from("shopping_list")
+      .select("*")
+      .eq("user_id", user_id);
+
+    if (error) return res.status(500).json({ error: error.message });
+    res.json(data);
   } catch (err) {
-    next(err);
+    res.status(500).json({ error: err.message });
   }
 };

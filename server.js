@@ -1,6 +1,8 @@
-import dotenv from "dotenv";
 import express from "express";
-import { createClient } from "@supabase/supabase-js";
+import dotenv from "dotenv";
+import cors from "cors";
+
+// Routes
 import plantRoutes from "./routes/plantRoutes.js";
 import gardenRoutes from "./routes/gardenRoutes.js";
 import journalRoutes from "./routes/journalRoutes.js";
@@ -12,14 +14,15 @@ import shoppingRoutes from "./routes/shoppingRoutes.js";
 dotenv.config();
 
 const app = express();
+app.use(cors());
 app.use(express.json());
 
-/* ✅ ROOT ROUTE (ADD THIS) */
+// Root route
 app.get("/", (req, res) => {
   res.send("🌱 HomeGardeningAssistant API Running Successfully");
 });
 
-/* ✅ ROUTES */
+// API routes
 app.use("/api/plants", plantRoutes);
 app.use("/api/garden", gardenRoutes);
 app.use("/api/journal", journalRoutes);
@@ -28,8 +31,11 @@ app.use("/api/forum", forumRoutes);
 app.use("/api/challenges", challengeRoutes);
 app.use("/api/shopping", shoppingRoutes);
 
-const PORT = process.env.PORT || 5000;
-
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
+// Error middleware
+app.use((err, req, res, next) => {
+  console.error(err);
+  res.status(500).json({ error: err.message });
 });
+
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));

@@ -1,20 +1,18 @@
-import * as reminderModel from "../models/reminderModel.js";
 import { supabase } from "../config/supabaseClient.js";
-export const addReminder = async (req, res, next) => {
-  try {
-    const result = await reminderModel.createReminder(req.body);
-    res.status(201).json(result);
-  } catch (err) {
-    next(err);
-  }
-};
 
-export const getReminder = async (req, res, next) => {
+export const getUserReminders = async (req, res) => {
+  const { user_garden_id } = req.query;
+  if (!user_garden_id) return res.status(400).json({ error: "user_garden_id required" });
+
   try {
-    const { user_garden_id } = req.query;
-    const result = await reminderModel.getReminders(user_garden_id);
-    res.json(result);
+    const { data, error } = await supabase
+      .from("watering_reminders")
+      .select("*")
+      .eq("user_garden_id", user_garden_id);
+
+    if (error) return res.status(500).json({ error: error.message });
+    res.json(data);
   } catch (err) {
-    next(err);
+    res.status(500).json({ error: err.message });
   }
 };

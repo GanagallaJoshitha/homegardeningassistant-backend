@@ -1,15 +1,35 @@
-import * as plantModel from "../models/plantModel.js";
 import { supabase } from "../config/supabaseClient.js";
-export const getPlants = async (req, res) => {
+
+// GET all plants
+export const getAllPlants = async (req, res, next) => {
   try {
     const { data, error } = await supabase
       .from("plants")
-      .select("*");
+      .select("*")
+      .order("name", { ascending: true });
 
     if (error) throw error;
 
-    res.status(200).json(data);   // ✅ MUST be .json()
-  } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.json(data);
+  } catch (err) {
+    next(err);
+  }
+};
+
+// GET single plant by ID
+export const getPlantById = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { data, error } = await supabase
+      .from("plants")
+      .select("*")
+      .eq("id", id)
+      .single();
+
+    if (error) throw error;
+
+    res.json(data);
+  } catch (err) {
+    next(err);
   }
 };

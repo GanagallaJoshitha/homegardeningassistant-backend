@@ -1,9 +1,9 @@
 import express from "express";
-import { addPlant, getGarden } from "../controllers/gardenController.js";
+import { getUserGarden, addToGarden } from "../controllers/gardenController.js";
 
 const router = express.Router();
 
-router.post("/", addPlant);
-router.get("/", getGarden);
+router.get("/", getUserGarden);
+router.post("/", addToGarden);
 
 export default router;
