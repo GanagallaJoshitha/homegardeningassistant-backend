@@ -1,41 +1,32 @@
-import express from "express";
-import dotenv from "dotenv";
-import cors from "cors";
+const express = require("express");
+const cors = require("cors");
+require("dotenv").config();
 
-// Routes
-import plantRoutes from "./routes/plantRoutes.js";
-import gardenRoutes from "./routes/gardenRoutes.js";
-import journalRoutes from "./routes/journalRoutes.js";
-import reminderRoutes from "./routes/reminderRoutes.js";
-import forumRoutes from "./routes/forumRoutes.js";
-import challengeRoutes from "./routes/challengeRoutes.js";
-import shoppingRoutes from "./routes/shoppingRoutes.js";
-
-dotenv.config();
+const authRoutes = require("./src/routes/authRoutes");
+const plantRoutes = require("./src/routes/plantRoutes");
+const gardenRoutes = require("./src/routes/gardenRoutes");
+const journalRoutes = require("./src/routes/journalRoutes");
+const forumRoutes = require("./src/routes/forumRoutes");
+const dashboardRoutes = require("./src/routes/dashboardRoutes");
 
 const app = express();
+
 app.use(cors());
 app.use(express.json());
 
-// Root route
-app.get("/", (req, res) => {
-  res.send("🌱 HomeGardeningAssistant API Running Successfully");
-});
-
-// API routes
+app.use("/api/auth", authRoutes);
 app.use("/api/plants", plantRoutes);
 app.use("/api/garden", gardenRoutes);
 app.use("/api/journal", journalRoutes);
-app.use("/api/reminders", reminderRoutes);
 app.use("/api/forum", forumRoutes);
-app.use("/api/challenges", challengeRoutes);
-app.use("/api/shopping", shoppingRoutes);
+app.use("/api/dashboard", dashboardRoutes);
 
-// Error middleware
-app.use((err, req, res, next) => {
-  console.error(err);
-  res.status(500).json({ error: err.message });
+app.get("/", (req, res) => {
+  res.send("Home Gardening Assistant Backend Running");
 });
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
